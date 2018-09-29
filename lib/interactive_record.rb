@@ -47,11 +47,15 @@ class InteractiveRecord
   end
 
   def self.find_by(attribute)
-    sql = "SELECT * FROM #{self.table_name} WHERE attribute.keys[0] = '#{attribute.values[0]}'"
+    sql = "SELECT * FROM #{self.table_name} WHERE #{attribute.keys[0]} = '#{attribute.values[0]}'"
     DB[:conn].execute(sql)
   end
 
   def save
+    options.each do |property, value|
+      self.send("#{property}=", value)
+    end
+    
     sql = "INSERT INTO #{table_name_for_insert} (#{col_names_for_insert}) VALUES (#{values_for_insert})"
     DB[:conn].execute(sql)
     @id = DB[:conn].execute("SELECT last_insert_rowid() FROM #{table_name_for_insert}")[0][0]
